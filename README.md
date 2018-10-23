@@ -1,2 +1,2 @@
 # CS50
-Assignments from Harvard CS50 Course
+Assignments and exercises of the CS50 course
