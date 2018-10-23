@@ -1,2 +1,2 @@
 # CS50
-Design and Analysis of Algorithms / Harvard University's introduction to the intellectual enterprises of computer science and the art of programming.
+Assignments and exercises of the CS50 course
