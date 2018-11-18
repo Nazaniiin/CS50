@@ -1,2 +1,2 @@
 # CS50
-Assignments and exercises of the CS50 course
+This project contains all the assignments and exercises of the Introduction to Computer Science course offered by Harvard University.
