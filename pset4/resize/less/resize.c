@@ -1,4 +1,7 @@
-// Resizes a BMP files
+// Resizes a BMP files with a multiplier between 0 and 100
+// This script only supports natural numbers as multipliers
+// A more complicated version of this script which also supports
+// decimal numbers can be found under resize/more directory
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,20 +76,15 @@ int main(int argc, char *argv[])
     bi_resize.biHeight = bi_resize.biHeight * f;
     bi_resize.biWidth = bi_resize.biWidth * f;
 
-    printf("bi_resize.biHeight %d\n", bi_resize.biHeight);
-    printf("bi_resize.biWidth %d\n", bi_resize.biWidth);
 
     // Padding for the resized image
     int padding_resize = (4 - (bi_resize.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
-    printf("padding_resize %d\n", padding_resize);
 
     // ImageSize for the resized image
     bi_resize.biSizeImage = ((sizeof(RGBTRIPLE) * bi_resize.biWidth) + padding_resize) * abs(bi_resize.biHeight);
-    printf("bi_resize.biSizeImage %d\n", bi_resize.biSizeImage);
 
     // bfSize for the resized image
     bf_resize.bfSize = bi_resize.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-    printf("bf_resize.bfSize %d\n", bf_resize.bfSize);
 
     // Write outfile's BITMAPFILEHEADER
     fwrite(&bf_resize, sizeof(BITMAPFILEHEADER), 1, outptr);
@@ -106,10 +104,12 @@ int main(int argc, char *argv[])
             // Read RGB triple from infile
             fread(&triple[i][j], sizeof(RGBTRIPLE), 1, inptr);
         }
+        // Multiply each row
         for (int r = 0; r < f; r++)
         {
             for (int j = 0; j < bi.biWidth; j++)
             {
+                // Multiply each pixel in a row
                 for (int m = 0; m < f; m++)
                     {
                         // Write RGB triple to outfile
