@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "bmp.h"
 
@@ -10,15 +11,15 @@ int main(int argc, char *argv[])
     // ensure proper usage
     if (argc != 4)
     {
-        fprintf(stderr, "Usage: Resize infile outfile\n");
+        fprintf(stderr, "Usage: Resize scale infile outfile\n");
         return 1;
     }
 
-    int n = atof(argv[1]);
+    float f = atof(argv[1]);
 
-    if (n < 0 || n > 100)
+    if (f < 0 || f > 100)
     {
-        fprintf(stderr, "Resize number should be between 0-100\n");
+        fprintf(stderr, "Resize scale should be between 0-100\n");
         return 2;
     }
 
@@ -44,15 +45,12 @@ int main(int argc, char *argv[])
     }
 
     // read infile's BITMAPFILEHEADER
-    BITMAPFILEHEADER bf, bf_resize;
+    BITMAPFILEHEADER bf;
     fread(&bf, sizeof(BITMAPFILEHEADER), 1, inptr);
 
     // read infile's BITMAPINFOHEADER
-    BITMAPINFOHEADER bi, bi_resize;
+    BITMAPINFOHEADER bi;
     fread(&bi, sizeof(BITMAPINFOHEADER), 1, inptr);
-
-    bf_resize = bf;
-    bi_resize = bi;
 
     // determine padding for scanlines
     int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
@@ -67,9 +65,18 @@ int main(int argc, char *argv[])
         return 4;
     }
 
+    // Metadata for the resized image
+    BITMAPFILEHEADER bf_resize = bf;
+    BITMAPINFOHEADER bi_resize = bi;
+
     // Width and Height for the resized image
-    bi_resize.biHeight *= n;
-    bi_resize.biWidth *= n;
+    bi_resize.biHeight *= floor(f);
+    bi_resize.biWidth *= floor(f);
+
+    float f2 = floor(f);
+    printf("f2 %f\n", f2);
+    printf("bi_resize.biHeight %d\n", bi_resize.biHeight);
+    printf("bi_resize.biWidth %d\n", bi_resize.biWidth);
 
     // Padding for the resized image
     int padding_resize = (4 - (bi_resize.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
@@ -86,36 +93,36 @@ int main(int argc, char *argv[])
     // write outfile's BITMAPINFOHEADER
     fwrite(&bi_resize, sizeof(BITMAPINFOHEADER), 1, outptr);
 
+    // temporary storage
+    RGBTRIPLE triple[abs(bi.biHeight)][bi.biWidth];
+
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
     {
         // iterate over pixels in scanline
         for (int j = 0; j < bi.biWidth; j++)
         {
-            // temporary storage
-            RGBTRIPLE triple, triple_resize;
-
             // read RGB triple from infile
-            fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-
-            triple_resize = triple;
-            triple_resize.rgbtBlue *= n;
-            triple_resize.rgbtGreen *= n;
-            triple_resize.rgbtRed *= n;
-
-            printf("%d", triple_resize.rgbtBlue);
-            // write RGB triple to outfile
-            fwrite(&triple_resize, sizeof(RGBTRIPLE), 1, outptr);
+            fread(&triple[i][j], sizeof(RGBTRIPLE), 1, inptr);
         }
-
+        for (int r = 0; r < f; r++)
+        {
+            for (int j = 0; j < bi.biWidth; j++)
+            {
+                for (int m = 0; m < f; m++)
+                    {
+                        // write RGB triple to outfile
+                        fwrite(&triple[i][j], sizeof(RGBTRIPLE), 1, outptr);
+                    }
+            }
+            // then add it back (to demonstrate how)
+            for (int k = 0; k < padding_resize; k++)
+            {
+                fputc(0x00, outptr);
+            }
+        }
         // skip over padding, if any
         fseek(inptr, padding, SEEK_CUR);
-
-        // then add it back (to demonstrate how)
-        for (int k = 0; k < padding; k++)
-        {
-            fputc(0x00, outptr);
-        }
     }
 
     // close infile
