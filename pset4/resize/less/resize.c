@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     // Write outfile's BITMAPINFOHEADER
     fwrite(&bi_resize, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-    // Temporary storage
+    // Temporary storage in matrix
     RGBTRIPLE triple[abs(bi.biHeight)][bi.biWidth];
 
     // Iterate over infile's scanlines
@@ -105,12 +105,12 @@ int main(int argc, char *argv[])
             fread(&triple[i][j], sizeof(RGBTRIPLE), 1, inptr);
         }
         // Multiply each row
-        for (int r = 0; r < f; r++)
+        for (int r = 0; r < floor(f); r++)
         {
             for (int j = 0; j < bi.biWidth; j++)
             {
                 // Multiply each pixel in a row
-                for (int m = 0; m < f; m++)
+                for (int m = 0; m < floor(f); m++)
                     {
                         // Write RGB triple to outfile
                         fwrite(&triple[i][j], sizeof(RGBTRIPLE), 1, outptr);
