@@ -1,7 +1,5 @@
 // Resizes a BMP files with a multiplier between 0 and 100
 // This script only supports natural numbers as multipliers
-// A more complicated version of this script which also supports
-// decimal numbers can be found under resize/more directory
 
 #include <stdio.h>
 #include <stdlib.h>
